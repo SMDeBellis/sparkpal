@@ -1,6 +1,7 @@
-const i2c = require('i2c-bus');
-const oled = require('oled-i2c-bus');
-const font = require('oled-font-5x7');
+// const i2c = require('i2c-bus');
+// const oled = require('oled-i2c-bus');
+// const font = require('oled-font-5x7');
+const readline = require("readline");
 const gpio = require('rpi-gpio');
 const bluetooth = require('node-bluetooth');
 const debounce = require('debounce');
@@ -9,30 +10,30 @@ const Spark = require("./spkHelper");
 const configFilePath = "./config.json";
 const pause = (ms) => new Promise(res => setTimeout(res, ms));
 //Oled display definion
-const oledOpts = { width: 128, height: 64, address: 0x3C};
+// const oledOpts = { width: 128, height: 64, address: 0x3C};
 //GPIO physical pin
 const presetUp = 11;
 const presetDown = 13;;
-const driveToggle = 33;
-const modToggle = 35;
-const delayToggle = 37;
-const driveLED = 36;
-const modLED = 38;
-const delayLED = 40;
+// const driveToggle = 33;
+// const modToggle = 35;
+// const delayToggle = 37;
+// const driveLED = 36;
+// const modLED = 38;
+// const delayLED = 40;
 //GPIO listener
 gpio.setup(presetUp, gpio.DIR_IN, gpio.EDGE_BOTH);
 gpio.setup(presetDown, gpio.DIR_IN, gpio.EDGE_BOTH);
-gpio.setup(driveToggle, gpio.DIR_IN, gpio.EDGE_BOTH);
-gpio.setup(modToggle, gpio.DIR_IN, gpio.EDGE_BOTH);
-gpio.setup(delayToggle, gpio.DIR_IN, gpio.EDGE_BOTH);
-gpio.setup(driveLED, gpio.DIR_OUT);
-gpio.setup(modLED, gpio.DIR_OUT);
-gpio.setup(delayLED, gpio.DIR_OUT);
+// gpio.setup(driveToggle, gpio.DIR_IN, gpio.EDGE_BOTH);
+// gpio.setup(modToggle, gpio.DIR_IN, gpio.EDGE_BOTH);
+// gpio.setup(delayToggle, gpio.DIR_IN, gpio.EDGE_BOTH);
+// gpio.setup(driveLED, gpio.DIR_OUT);
+// gpio.setup(modLED, gpio.DIR_OUT);
+// gpio.setup(delayLED, gpio.DIR_OUT);
 
 let config = {};
 let version = 0.1;
-let i2cBus = i2c.openSync(1);    
-let display = new oled(i2cBus, oledOpts);  
+// let i2cBus = i2c.openSync(1);    
+// let display = new oled(i2cBus, oledOpts);  
 let sparkConnection;  
 let activePreset;
 let fxStatus = {};
@@ -41,10 +42,10 @@ const device = new bluetooth.DeviceINQ();
 const exitHandler = () => {
     console.log(`User stopped.`);    
     if(sparkConnection) sparkConnection.close();
-    display.turnOffDisplay(); 
-    gpio.write(driveLED, false);    
-    gpio.write(modLED, false);    
-    gpio.write(delayLED, false);   
+    // display.turnOffDisplay(); 
+    // gpio.write(driveLED, false);    
+    // gpio.write(modLED, false);    
+    // gpio.write(delayLED, false);   
     gpio.reset();
     gpio.destroy();
     process.exit();
@@ -65,14 +66,14 @@ const writeConfigFile = () => {
     fs.writeFileSync(configFilePath, JSON.stringify(config));
 };
 //Oled message display
-const displayMessage = (message, size=1) => {
-    display.clearDisplay(); 
-    display.setCursor(1, 1);
-    display.writeString(font, size, message, 1, true);
-};
+// const displayMessage = (message, size=1) => {
+//     display.clearDisplay(); 
+//     display.setCursor(1, 1);
+//     display.writeString(font, size, message, 1, true);
+// };
 const pairSparkBTDevice = () => {
     console.log('pairing...');
-    displayMessage("pairing...");  
+    // displayMessage("pairing...");  
     if(config && config.sparkBTConn && config.sparkBTConn.address && config.sparkBTConn.channel){
         console.log("Connect Spark using the stored address & ch info.")
         try{
@@ -80,7 +81,7 @@ const pairSparkBTDevice = () => {
         }
         catch(err){
             console.error(err);
-            displayMessage("Failed to connet Spark.");    
+            // displayMessage("Failed to connet Spark.");    
             //TODO fall back to scan?    
         }
     }   
@@ -95,7 +96,7 @@ const pairSparkBTDevice = () => {
                 }       
                 catch(err){
                     console.error(err);
-                    displayMessage("Failed to connet Spark.");        
+                    // displayMessage("Failed to connet Spark.");        
                 }
             }     
         });
@@ -132,22 +133,22 @@ const connectSparkBT = (address, channel, updateCofigFile=false) =>{
                         fxStatus = Spark.parsePresetData(receivedPresetData);                    
                         receivedPresetData = null;
                         console.log(fxStatus);
-                        if(fxStatus && fxStatus.drive)
-                            gpio.write(driveLED, fxStatus.drive.enabled);                        
-                        if(fxStatus && fxStatus.mod)                            
-                            gpio.write(modLED, fxStatus.mod.enabled);                        
-                        if(fxStatus && fxStatus.delay)                                                    
-                            gpio.write(delayLED, fxStatus.delay.enabled);                        
+                        // if(fxStatus && fxStatus.drive)
+                        //     gpio.write(driveLED, fxStatus.drive.enabled);                        
+                        // if(fxStatus && fxStatus.mod)                            
+                        //     gpio.write(modLED, fxStatus.mod.enabled);                        
+                        // if(fxStatus && fxStatus.delay)                                                    
+                        //     gpio.write(delayLED, fxStatus.delay.enabled);                        
                     }                  
                 }
                 else if(data.indexOf(Spark.dataPrefix.currentPreset) === 0){                             
                     activePreset = parseInt(data.substr(Spark.dataPrefix.currentPreset.length, 1)) + 1;
                     console.log(`active preset ${activePreset}`);
-                    displayMessage(activePreset.toString(), 4);
+                    // displayMessage(activePreset.toString(), 4);
                 }
             });               
             console.log("connected");
-            displayMessage("Spark is connected");
+            // displayMessage("Spark is connected");
             console.log("Request for the current preset number")
             sparkConnection.write(Buffer.from(Spark.command.preset.current, "hex"),()=>{ });            
             console.log("Request for the current preset data");
@@ -160,32 +161,32 @@ device.on('finished',  ()=>{
     console.log("Scan finished");   
 });
 
-const toggleFXStatus = (fxType) => {
-    if(fxStatus && fxStatus[fxType] && sparkConnection){
-        let cmd = fxStatus[fxType].enabled === true ? Spark.command.fx[fxType][fxStatus[fxType].id].off : Spark.command.fx[fxType][fxStatus[fxType].id].on;
-        let LEDPin;
-        switch (fxType){
-            case "drive":
-                LEDPin = driveLED;
-                break;
-            case "mod":
-                LEDPin = modLED;
-                break;
-            case "delay":
-                LEDPin = delayLED;
-                break;
-            default:
-                LEDPin = driveLED;
-                break;
-        }
-        console.log(`Sent fx command: ${cmd}`);
-        sparkConnection.write(Buffer.from(cmd, "hex"),()=>{ 
-            fxStatus[fxType].enabled = !fxStatus[fxType].enabled;                 
-            gpio.write(LEDPin, fxStatus[fxType].enabled);
-            console.log(`Sent ${fxType}: ${fxStatus[fxType].enabled }`);       
-        });
-    }
-};
+// const toggleFXStatus = (fxType) => {
+//     if(fxStatus && fxStatus[fxType] && sparkConnection){
+//         let cmd = fxStatus[fxType].enabled === true ? Spark.command.fx[fxType][fxStatus[fxType].id].off : Spark.command.fx[fxType][fxStatus[fxType].id].on;
+//         let LEDPin;
+//         switch (fxType){
+//             case "drive":
+//                 LEDPin = driveLED;
+//                 break;
+//             case "mod":
+//                 LEDPin = modLED;
+//                 break;
+//             case "delay":
+//                 LEDPin = delayLED;
+//                 break;
+//             default:
+//                 LEDPin = driveLED;
+//                 break;
+//         }
+//         console.log(`Sent fx command: ${cmd}`);
+//         sparkConnection.write(Buffer.from(cmd, "hex"),()=>{ 
+//             fxStatus[fxType].enabled = !fxStatus[fxType].enabled;                 
+//             gpio.write(LEDPin, fxStatus[fxType].enabled);
+//             console.log(`Sent ${fxType}: ${fxStatus[fxType].enabled }`);       
+//         });
+//     }
+// };
 
 const switchPreset = (direction) => {
     if(direction === "up")
@@ -195,13 +196,45 @@ const switchPreset = (direction) => {
     if (sparkConnection){
         console.log(`Change to Preset ${activePreset}`);            
         sparkConnection.write(Buffer.from(Spark.command.preset[`set${activePreset}`], "hex"), async ()=>{ 
-            displayMessage(activePreset.toString(), 4);   
+            // displayMessage(activePreset.toString(), 4);   
             // await pause(200);         
             console.log("Request for the current preset data");
             sparkConnection.write(Buffer.from(Spark.command.preset.currentData, "hex"), ()=>{});
         });        
     }
 };
+
+const getInput = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+})
+
+
+let running = true;
+const run = () => {
+    while(running){
+        getInput.question('Command (up, down, close) ->', (command) => {
+            console.log(`ommand received: ${command}`)
+            switch(command){
+                case "up":
+                    debounce(switchPreset("up"), 10, true);
+                    break;
+                case "down":
+                    debounce(switchPreset("down"), 10, true);    
+                    break;
+                case "close":
+                    running = false;
+                    break;
+                default:
+                    console.log(`unknown command: ${command}`)
+                    break; 
+            }
+        });
+    }
+    getInput.close()
+};
+
+getInput.on("close", exitHandler);
 
 gpio.on('change', (ch, value)=>{        
     if (value === true){                              
@@ -212,15 +245,15 @@ gpio.on('change', (ch, value)=>{
             case presetDown:
                 debounce(switchPreset("down"), 10, true);    
                 break;            
-            case driveToggle:
-                debounce(toggleFXStatus("drive"), 10, true);                
-                break;
-            case modToggle:
-                debounce(toggleFXStatus("mod"), 10, true);
-                break;
-            case delayToggle:
-                debounce(toggleFXStatus("delay"), 10, true);
-                break;
+            // case driveToggle:
+            //     debounce(toggleFXStatus("drive"), 10, true);                
+            //     break;
+            // case modToggle:
+            //     debounce(toggleFXStatus("mod"), 10, true);
+            //     break;
+            // case delayToggle:
+            //     debounce(toggleFXStatus("delay"), 10, true);
+            //     break;
         }     
     }
 });
@@ -229,9 +262,11 @@ process.on('SIGINT', exitHandler); //function to run when user closes using ctrl
 
 const init = () => {
     display.turnOnDisplay();
+    console.log('Welcome to SparkPal v${version}');
     displayMessage(`Welcome to SparkPal v${version}`);
     readConfigFile();
     pairSparkBTDevice();
+    run();
 }
 
 //Main
