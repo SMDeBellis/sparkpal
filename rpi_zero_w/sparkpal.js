@@ -261,9 +261,9 @@ gpio.on('change', (ch, value)=>{
 process.on('SIGINT', exitHandler); //function to run when user closes using ctrl+c
 
 const init = () => {
-    display.turnOnDisplay();
+    // display.turnOnDisplay();
     console.log('Welcome to SparkPal v${version}');
-    displayMessage(`Welcome to SparkPal v${version}`);
+    // displayMessage(`Welcome to SparkPal v${version}`);
     readConfigFile();
     pairSparkBTDevice();
     run();
